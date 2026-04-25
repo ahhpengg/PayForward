@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import {
   Store,
   Calendar,
@@ -11,9 +11,15 @@ import {
 
 export default function PaymentApproval() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [status, setStatus] = useState("review"); // review or success
   const [extraSaving, setExtraSaving] = useState(false);
   const [showAiAlert, setShowAiAlert] = useState(false);
+
+  // Get scanned data from location state
+  const scannedData = location.state || {};
+  const merchant = scannedData.merchant || "Jaya Grocer";
+  const amount = scannedData.amount || 80.00;
 
   const proceedWithPayment = (withExtra) => {
     setExtraSaving(withExtra);
@@ -33,7 +39,7 @@ export default function PaymentApproval() {
         <h2 style={{ fontSize: "24px", fontWeight: "bold" }}>
           Payment Approved
         </h2>
-        <p className="mt-2 text-muted">RM 80.00 to Jaya Grocer</p>
+        <p className="mt-2 text-muted">RM {amount.toFixed(2)} to {merchant}</p>
 
         <div
           className="card mt-6"
@@ -95,9 +101,9 @@ export default function PaymentApproval() {
         >
           <Store size={32} color="var(--text-main)" />
         </div>
-        <h2>Jaya Grocer</h2>
+        <h2>{merchant}</h2>
         <div style={{ fontSize: "32px", fontWeight: "bold", marginTop: "8px" }}>
-          RM 80.00
+          RM {amount.toFixed(2)}
         </div>
       </div>
 
@@ -111,7 +117,7 @@ export default function PaymentApproval() {
           </div>
           <div className="flex justify-between items-center mb-1">
             <span className="text-sm">Weekly Installment</span>
-            <span className="font-semibold">RM 20.00</span>
+            <span className="font-semibold">RM {(amount / 4).toFixed(2)}</span>
           </div>
           <div
             className="flex justify-between items-center text-sm"
@@ -169,7 +175,7 @@ export default function PaymentApproval() {
           className="btn btn-primary"
           onClick={() => setShowAiAlert(true)}
         >
-          Confirm & Pay RM 80.00
+          Confirm & Pay RM {amount.toFixed(2)}
         </button>
       </div>
 

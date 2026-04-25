@@ -16,6 +16,7 @@ import {
 import PayForwardHome from "./pages/PayForwardHome";
 import PaymentApproval from "./pages/PaymentApproval";
 import SavingsTracker from "./pages/SavingsTracker";
+import QRScanner from "./components/QRScanner";
 
 function MobileContainer({ children }) {
   return <div className="mobile-container">{children}</div>;
@@ -137,11 +138,18 @@ function BottomNav() {
   );
 }
 
-function App() {
+function AppContent() {
+  const location = useLocation();
+  const isScanRoute = location.pathname === '/scan';
+
   return (
-    <Router>
-      <MobileContainer>
-        <Header />
+    <MobileContainer>
+      {!isScanRoute && <Header />}
+      {isScanRoute ? (
+        <Routes>
+          <Route path="/scan" element={<QRScanner />} />
+        </Routes>
+      ) : (
         <div className="scroll-area">
           <Routes>
             <Route path="/" element={<PayForwardHome />} />
@@ -149,8 +157,16 @@ function App() {
             <Route path="/savings" element={<SavingsTracker />} />
           </Routes>
         </div>
-        <BottomNav />
-      </MobileContainer>
+      )}
+      {!isScanRoute && <BottomNav />}
+    </MobileContainer>
+  );
+}
+
+function App() {
+  return (
+    <Router>
+      <AppContent />
     </Router>
   );
 }
