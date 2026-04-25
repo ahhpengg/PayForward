@@ -171,63 +171,208 @@ export default function QRScanner() {
   // Payment amount input screen
   if (hasScanned && qrData) {
     return (
-      <div className="flex flex-col" style={{ height: '100%', background: 'var(--bg)' }}>
-        <div className="flex items-center justify-between p-4 border-b border-gray-200">
-          <h2 className="text-lg font-semibold">Enter Payment Amount</h2>
-          <button onClick={() => navigate('/')} className="p-2 rounded-full hover:bg-gray-100">
-            <X size={24} />
+      <div className="flex flex-col" style={{ height: '100%', background: '#f0f4ff' }}>
+        <style>{`
+          .amount-input::-webkit-inner-spin-button,
+          .amount-input::-webkit-outer-spin-button {
+            opacity: 1;
+            height: 40px;
+          }
+          .pay-btn {
+            background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 60%, #3b82f6 100%);
+            box-shadow: 0 4px 15px rgba(37,99,235,0.4);
+            transition: box-shadow 0.2s, transform 0.1s;
+          }
+          .pay-btn:hover:not(:disabled) {
+            box-shadow: 0 6px 20px rgba(37,99,235,0.5);
+            transform: translateY(-1px);
+          }
+          .pay-btn:disabled {
+            background: #93c5fd;
+            box-shadow: none;
+          }
+          .scan-btn {
+            background: white;
+            border: 1.5px solid #dbeafe;
+            color: #1d4ed8;
+            transition: background 0.2s;
+          }
+          .scan-btn:hover {
+            background: #eff6ff;
+          }
+          .amount-input:focus {
+            border-color: #2563eb !important;
+            box-shadow: 0 0 0 3px rgba(37,99,235,0.12);
+          }
+        `}</style>
+ 
+        {/* Header */}
+        <div style={{
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          padding: '16px 20px',
+          background: 'white',
+          borderBottom: '1px solid #e0e7ff',
+          boxShadow: '0 1px 4px rgba(37,99,235,0.07)',
+        }}>
+          <div>
+            <h2 style={{ fontSize: '17px', fontWeight: '700', color: '#0f172a', margin: 0 }}>Enter Payment Amount</h2>
+            <p style={{ fontSize: '12px', color: '#64748b', margin: 0, marginTop: '1px' }}>Review and confirm your payment</p>
+          </div>
+          <button
+            onClick={() => navigate('/')}
+            style={{
+              width: '34px', height: '34px', borderRadius: '50%',
+              background: '#f1f5f9', border: 'none', cursor: 'pointer',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}
+          >
+            <X size={18} color="#475569" />
           </button>
         </div>
  
-        <div className="flex-1 p-6">
-          <div className="card mb-6">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
-                <Camera size={20} color="var(--success)" />
+        <div className="flex-1 flex flex-col" style={{ padding: '20px 16px', gap: '14px' }}>
+ 
+          {/* Merchant info card */}
+          <div style={{
+            background: 'white',
+            borderRadius: '16px',
+            padding: '16px',
+            boxShadow: '0 2px 12px rgba(37,99,235,0.08)',
+            border: '1px solid #e0e7ff',
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              {/* Icon */}
+              <div style={{
+                width: '46px', height: '46px', flexShrink: 0,
+                background: 'linear-gradient(135deg, #dbeafe, #eff6ff)',
+                borderRadius: '12px',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                border: '1px solid #bfdbfe',
+              }}>
+                <Camera size={20} color="#2563eb" />
               </div>
-              <div>
-                <h3 className="font-semibold">{merchant || 'Scanned Merchant'}</h3>
-                <p className="text-sm text-muted">QR Code scanned. Enter the amount to proceed.</p>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontSize: '11px', fontWeight: '600', color: '#2563eb', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '3px' }}>
+                  Merchant
+                </div>
+                <h3 style={{
+                  fontSize: '15px', fontWeight: '700', color: '#0f172a', margin: 0,
+                  overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                }}>
+                  {merchant || 'Scanned Merchant'}
+                </h3>
+              </div>
+              {/* Blue checkmark badge */}
+              <div style={{
+                width: '28px', height: '28px', borderRadius: '50%', flexShrink: 0,
+                background: 'linear-gradient(135deg, #1d4ed8, #3b82f6)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                boxShadow: '0 2px 8px rgba(37,99,235,0.35)',
+              }}>
+                <svg width="13" height="13" viewBox="0 0 12 12" fill="none">
+                  <path d="M2 6l3 3 5-5" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
               </div>
             </div>
-            {scannedAmount ? (
-              <div className="text-sm text-success">Suggested amount found: RM {scannedAmount.toFixed(2)}</div>
-            ) : (
-              <div className="text-sm text-muted">Amount was not embedded in the QR; please type it below.</div>
+ 
+            {/* Divider */}
+            <div style={{ height: '1px', background: '#f1f5f9', margin: '14px 0' }} />
+ 
+            {/* Status row */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <div style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#22c55e', flexShrink: 0 }} />
+              <span style={{ fontSize: '13px', color: '#64748b' }}>QR Code scanned successfully</span>
+            </div>
+ 
+            {/* Suggested amount banner */}
+            {scannedAmount && (
+              <div style={{
+                marginTop: '12px', padding: '10px 14px',
+                background: 'linear-gradient(135deg, #dbeafe, #eff6ff)',
+                borderRadius: '10px', border: '1px solid #bfdbfe',
+                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+              }}>
+                <span style={{ fontSize: '13px', color: '#1d4ed8', fontWeight: '500' }}>Suggested amount</span>
+                <span style={{ fontSize: '16px', fontWeight: '800', color: '#1d4ed8' }}>
+                  RM {scannedAmount.toFixed(2)}
+                </span>
+              </div>
             )}
           </div>
  
-          <div className="mb-6">
-            <label className="block text-sm font-medium mb-2">Payment Amount (RM)</label>
-            <input
-              type="number"
-              step="0.01"
-              min="0"
-              value={paymentAmount}
-              onChange={(e) => setPaymentAmount(e.target.value)}
-              className="w-full p-4 border border-gray-300 rounded-lg text-lg"
-              placeholder="0.00"
-              autoFocus
-            />
+          {/* Amount input card */}
+          <div style={{
+            background: 'white',
+            borderRadius: '16px',
+            padding: '16px',
+            boxShadow: '0 2px 12px rgba(37,99,235,0.08)',
+            border: '1px solid #e0e7ff',
+          }}>
+            <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '10px' }}>
+              Payment Amount
+            </label>
+            <div style={{ position: 'relative' }}>
+              <span style={{
+                position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)',
+                fontSize: '18px', fontWeight: '700', color: '#94a3b8',
+                pointerEvents: 'none',
+              }}>
+                RM
+              </span>
+              <input
+                type="number"
+                step="0.01"
+                min="0"
+                value={paymentAmount}
+                onChange={(e) => setPaymentAmount(e.target.value)}
+                className="amount-input"
+                style={{
+                  width: '100%',
+                  padding: '14px 14px 14px 54px',
+                  border: '1.5px solid #e0e7ff',
+                  borderRadius: '12px',
+                  fontSize: '24px',
+                  fontWeight: '800',
+                  outline: 'none',
+                  background: '#f8faff',
+                  color: '#0f172a',
+                  boxSizing: 'border-box',
+                  transition: 'border-color 0.2s, box-shadow 0.2s',
+                }}
+                placeholder="0.00"
+                autoFocus
+              />
+            </div>
+            {!scannedAmount && (
+              <p style={{ marginTop: '8px', fontSize: '12px', color: '#94a3b8' }}>
+                Amount was not embedded in the QR — please enter it manually.
+              </p>
+            )}
           </div>
  
-          <div className="flex gap-3">
+          {/* Spacer */}
+          <div style={{ flex: 1 }} />
+ 
+          {/* Action buttons */}
+          <div style={{ display: 'flex', gap: '12px', paddingBottom: '8px' }}>
             <button
               onClick={resetScanner}
-              className="flex-1 btn"
-              style={{ background: 'var(--card-bg)', border: '1px solid var(--border)' }}
+              className="flex-1 btn scan-btn"
+              style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', fontWeight: '600' }}
             >
-              <RotateCcw size={16} className="mr-2" />
+              <RotateCcw size={15} />
               Scan Again
             </button>
             <button
               onClick={handlePayment}
-              className="flex-1 btn btn-primary"
+              className="flex-1 btn pay-btn"
               disabled={!paymentAmount || parseFloat(paymentAmount) <= 0}
+              style={{ color: 'white', fontWeight: '700', border: 'none' }}
             >
               Pay Now
             </button>
           </div>
+ 
         </div>
       </div>
     );
