@@ -1,0 +1,13 @@
+# Deployment artifacts
+backend.zip
+backend.tar.gz
+
+# Screenshots
+screenshot*.png
+
+# Build outputs / temp files
+tng/dist.zip
+tng/dist_fixed.zip
+tng/dist_check/
+tng/fixzip.py
+tng/http_matches.txt
