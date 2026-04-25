@@ -1,0 +1,17 @@
+version: 1
+frontend:
+  phases:
+    preBuild:
+      commands:
+        - cd tng
+        - npm ci
+    build:
+      commands:
+        - npm run build
+  artifacts:
+    baseDirectory: tng/dist
+    files:
+      - '**/*'
+  cache:
+    paths:
+      - tng/node_modules/**/*
