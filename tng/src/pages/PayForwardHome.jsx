@@ -126,7 +126,7 @@ export default function PayForwardHome() {
       >
         <button
           className="btn btn-primary"
-          onClick={() => navigate("/scan")}
+          onClick={() => navigate("scan")}
           style={{ padding: "16px", flexDirection: "column", gap: "8px" }}
         >
           <QrCode size={24} />

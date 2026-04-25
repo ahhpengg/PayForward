@@ -140,24 +140,19 @@ function BottomNav() {
 
 function AppContent() {
   const location = useLocation();
-  const isScanRoute = location.pathname === '/scan';
+  const isScanRoute = location.pathname.endsWith('/scan');
 
   return (
     <MobileContainer>
       {!isScanRoute && <Header />}
-      {isScanRoute ? (
+      <div className="scroll-area">
         <Routes>
-          <Route path="/scan" element={<QRScanner />} />
+          <Route path="scan" element={<QRScanner />} />
+          <Route path="/" element={<PayForwardHome />} />
+          <Route path="pay" element={<PaymentApproval />} />
+          <Route path="savings" element={<SavingsTracker />} />
         </Routes>
-      ) : (
-        <div className="scroll-area">
-          <Routes>
-            <Route path="/" element={<PayForwardHome />} />
-            <Route path="/pay" element={<PaymentApproval />} />
-            <Route path="/savings" element={<SavingsTracker />} />
-          </Routes>
-        </div>
-      )}
+      </div>
       {!isScanRoute && <BottomNav />}
     </MobileContainer>
   );
@@ -165,7 +160,7 @@ function AppContent() {
 
 function App() {
   return (
-    <Router>
+    <Router basename={import.meta.env.BASE_URL}>
       <AppContent />
     </Router>
   );
