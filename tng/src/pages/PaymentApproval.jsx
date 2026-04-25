@@ -19,7 +19,10 @@ export default function PaymentApproval() {
   // Get scanned data from location state
   const scannedData = location.state || {};
   const merchant = scannedData.merchant || "Jaya Grocer";
-  const amount = scannedData.amount || 80.00;
+  const amount = scannedData.amount || 80.0;
+  const creditLimit = scannedData.creditLimit ?? 500;
+  const remainingCredit = Math.max(creditLimit - amount, 0);
+  const usedCredit = Math.min(amount, creditLimit);
 
   const proceedWithPayment = (withExtra) => {
     setExtraSaving(withExtra);
@@ -41,12 +44,26 @@ export default function PaymentApproval() {
         </h2>
         <p className="mt-2 text-muted">RM {amount.toFixed(2)} to {merchant}</p>
 
+        <div className="card mt-4" style={{ width: "100%", padding: "18px" }}>
+          <div className="flex justify-between items-center mb-3">
+            <div>
+              <p className="text-sm text-muted">Credit used</p>
+              <p className="font-semibold">RM {usedCredit.toFixed(2)}</p>
+            </div>
+            <div style={{ textAlign: 'right' }}>
+              <p className="text-sm text-muted">Remaining limit</p>
+              <p className="font-semibold">RM {remainingCredit.toFixed(2)}</p>
+            </div>
+          </div>
+          <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
+            This payment will be deducted from your PayForward credit line.
+          </div>
+        </div>
+
         <div
-          className="card mt-6"
+          className="card"
           style={{
-            width: "100%",
-            background: "var(--success-light)",
-            border: "none",
+            padding: "0",
           }}
         >
           <div
@@ -104,6 +121,22 @@ export default function PaymentApproval() {
         <h2>{merchant}</h2>
         <div style={{ fontSize: "32px", fontWeight: "bold", marginTop: "8px" }}>
           RM {amount.toFixed(2)}
+        </div>
+      </div>
+
+      <div className="card" style={{ padding: "18px", marginBottom: "16px" }}>
+        <div className="flex justify-between items-center">
+          <div>
+            <p className="text-sm text-muted">Credit limit</p>
+            <p className="font-semibold">RM {creditLimit.toFixed(2)}</p>
+          </div>
+          <div style={{ textAlign: 'right' }}>
+            <p className="text-sm text-muted">After payment</p>
+            <p className="font-semibold">RM {remainingCredit.toFixed(2)}</p>
+          </div>
+        </div>
+        <div style={{ marginTop: '12px', fontSize: '12px', color: 'var(--text-muted)' }}>
+          This amount will be deducted from your available PayForward credit.
         </div>
       </div>
 

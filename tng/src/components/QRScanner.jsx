@@ -13,6 +13,7 @@ export default function QRScanner() {
   const [qrData, setQrData] = useState(null);
   const [paymentAmount, setPaymentAmount] = useState('');
   const [merchant, setMerchant] = useState('');
+  const [scannedAmount, setScannedAmount] = useState(null);
   const [error, setError] = useState(null);
 
   const startCamera = useCallback(async () => {
@@ -70,62 +71,76 @@ export default function QRScanner() {
 
       if (code) {
         console.log('QR Code detected:', code.data);
+        const parsed = parseQRData(code.data);
+        setMerchant(parsed.merchant);
+        setScannedAmount(parsed.amount);
+        setQrData(code.data);
+
+        stopCamera();
+
+        if (parsed.amount && parsed.amount > 0) {
+          navigate('/pay', {
+            state: {
+              merchant: parsed.merchant || 'Scanned Merchant',
+              amount: parsed.amount,
+              qrData: code.data,
+              creditLimit: 500,
+            },
+          });
+          return;
+        }
+
         setIsScanning(false);
         setHasScanned(true);
-        setQrData(code.data);
-        parseQRData(code.data);
-        stopCamera();
-        return; // Exit early to prevent further scanning
+        return;
       }
     }
-  }, [isScanning, stopCamera]);
+  }, [isScanning, stopCamera, navigate]);
 
   const parseQRData = (data) => {
     console.log('Parsing QR data:', data);
+    let merchantName = 'Scanned Merchant';
+    let amountValue = null;
+
     try {
-      // Try to parse as JSON first
       const parsed = JSON.parse(data);
       if (parsed.merchant) {
-        setMerchant(parsed.merchant);
+        merchantName = parsed.merchant;
       } else if (parsed.name) {
-        setMerchant(parsed.name);
+        merchantName = parsed.name;
       } else if (parsed.store) {
-        setMerchant(parsed.store);
-      } else {
-        setMerchant('Scanned Merchant');
+        merchantName = parsed.store;
+      }
+      if (parsed.amount) {
+        amountValue = parseFloat(parsed.amount);
       }
     } catch {
-      // If not JSON, try to extract merchant name from string
       const lines = data.split('\n').filter(line => line.trim());
-      let merchantName = 'Scanned Merchant';
 
       for (const line of lines) {
-        // Look for merchant/store patterns
-        if (line.toLowerCase().includes('merchant:') ||
-            line.toLowerCase().includes('store:') ||
-            line.toLowerCase().includes('shop:')) {
+        const lower = line.toLowerCase();
+        if (lower.includes('merchant:') || lower.includes('store:') || lower.includes('shop:')) {
           merchantName = line.split(':')[1]?.trim() || line;
-          break;
+          continue;
         }
-        // If line looks like a business name (contains common business words)
-        if (line.length > 3 &&
-            (line.toLowerCase().includes('grocer') ||
-             line.toLowerCase().includes('station') ||
-             line.toLowerCase().includes('mart') ||
-             line.toLowerCase().includes('shop') ||
-             line.toLowerCase().includes('store'))) {
+        const amountMatch = line.match(/rm\s*([0-9]+(?:\.[0-9]{1,2})?)/i) || line.match(/amount[:\s]*([0-9]+(?:\.[0-9]{1,2})?)/i);
+        if (amountMatch) {
+          amountValue = parseFloat(amountMatch[1]);
+        }
+        if (merchantName === 'Scanned Merchant' && (lower.includes('grocer') || lower.includes('station') || lower.includes('mart') || lower.includes('shop') || lower.includes('store'))) {
           merchantName = line;
-          break;
         }
       }
 
-      // If no specific merchant found, use first meaningful line
       if (merchantName === 'Scanned Merchant' && lines.length > 0) {
         merchantName = lines[0];
       }
-
-      setMerchant(merchantName);
     }
+
+    return {
+      merchant: merchantName,
+      amount: amountValue,
+    };
   };
 
   const handlePayment = () => {
@@ -135,13 +150,13 @@ export default function QRScanner() {
       return;
     }
 
-    // Navigate to payment approval with the scanned data
     navigate('/pay', {
       state: {
         merchant: merchant || 'Scanned Merchant',
         amount: amount,
-        qrData: qrData
-      }
+        qrData: qrData,
+        creditLimit: 500,
+      },
     });
   };
 
@@ -196,9 +211,14 @@ export default function QRScanner() {
               </div>
               <div>
                 <h3 className="font-semibold">{merchant || 'Scanned Merchant'}</h3>
-                <p className="text-sm text-muted">QR Code scanned successfully</p>
+                <p className="text-sm text-muted">QR Code scanned. Enter the amount to proceed.</p>
               </div>
             </div>
+            {scannedAmount ? (
+              <div className="text-sm text-success">Suggested amount found: RM {scannedAmount.toFixed(2)}</div>
+            ) : (
+              <div className="text-sm text-muted">Amount was not embedded in the QR; please type it below.</div>
+            )}
           </div>
 
           <div className="mb-6">
