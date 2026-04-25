@@ -1,4 +1,3 @@
-
 import React, { useRef, useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { X, Camera, Loader, RotateCcw } from 'lucide-react';
@@ -16,19 +15,16 @@ export default function QRScanner() {
   const [merchant, setMerchant] = useState('');
   const [scannedAmount, setScannedAmount] = useState(null);
   const [error, setError] = useState(null);
-
+  const [paymentError, setPaymentError] = useState('');
+ 
   const getStoredAvailableCredit = () => {
-    const storedAvailable = parseFloat(
-      sessionStorage.getItem('payforward_available_credit')
-    );
-    const storedLimit = parseFloat(
-      sessionStorage.getItem('payforward_credit_limit')
-    );
+    const storedAvailable = parseFloat(sessionStorage.getItem('payforward_available_credit'));
+    const storedLimit = parseFloat(sessionStorage.getItem('payforward_credit_limit'));
     if (!Number.isNaN(storedAvailable)) return storedAvailable;
     if (!Number.isNaN(storedLimit)) return storedLimit;
     return 500;
   };
-
+ 
   const currentCreditLimit = getStoredAvailableCredit();
  
   const startCamera = useCallback(async () => {
@@ -90,18 +86,12 @@ export default function QRScanner() {
         stopCamera();
  
         if (parsed.amount && parsed.amount > 0) {
-          if (parsed.amount > currentCreditLimit) {
-            setError('Payment amount RM ' + parsed.amount.toFixed(2) + ' exceeds your available credit of RM ' + currentCreditLimit.toFixed(2) + '. Please scan a different QR code or enter amount manually.');
-            setIsScanning(false);
-            setHasScanned(true);
-            return;
-          }
           navigate('/pay', {
             state: {
               merchant: parsed.merchant || 'Scanned Merchant',
               amount: parsed.amount,
               qrData: code.data,
-              creditLimit: currentCreditLimit,
+              creditLimit: 500,
             },
           });
           return;
@@ -152,13 +142,14 @@ export default function QRScanner() {
   const handlePayment = () => {
     const amount = parseFloat(paymentAmount);
     if (!paymentAmount || isNaN(amount) || amount <= 0) {
-      alert('Please enter a valid payment amount');
+      setPaymentError('Please enter a valid payment amount.');
       return;
     }
     if (amount > currentCreditLimit) {
-      alert('You do not have enough credit limit. Your current available credit is RM ' + currentCreditLimit.toFixed(2) + '. Please enter a lower amount.');
+      setPaymentError('Insufficient credit. Your available credit is RM ' + currentCreditLimit.toFixed(2) + '. Please enter a lower amount.');
       return;
     }
+    setPaymentError('');
     navigate('/pay', {
       state: {
         merchant: merchant || 'Scanned Merchant',
@@ -348,7 +339,7 @@ export default function QRScanner() {
                 step="0.01"
                 min="0"
                 value={paymentAmount}
-                onChange={(e) => setPaymentAmount(e.target.value)}
+                onChange={(e) => { setPaymentAmount(e.target.value); setPaymentError(''); }}
                 className="amount-input"
                 style={{
                   width: '100%',
@@ -378,7 +369,7 @@ export default function QRScanner() {
           <div style={{ flex: 1 }} />
  
           {/* Action buttons */}
-          <div style={{ display: 'flex', gap: '12px', paddingBottom: '8px' }}>
+          <div style={{ display: 'flex', gap: '12px' }}>
             <button
               onClick={resetScanner}
               className="flex-1 btn scan-btn"
@@ -390,12 +381,33 @@ export default function QRScanner() {
             <button
               onClick={handlePayment}
               className="flex-1 btn pay-btn"
-              disabled={!paymentAmount || parseFloat(paymentAmount) <= 0}
               style={{ color: 'white', fontWeight: '700', border: 'none' }}
             >
               Pay Now
             </button>
           </div>
+ 
+          {/* Inline error message */}
+          {paymentError && (
+            <div style={{
+              display: 'flex', alignItems: 'flex-start', gap: '8px',
+              padding: '12px 14px',
+              background: '#fff1f2',
+              border: '1px solid #fecdd3',
+              borderRadius: '12px',
+              marginTop: '4px',
+              paddingBottom: '8px',
+            }}>
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style={{ flexShrink: 0, marginTop: '1px' }}>
+                <circle cx="8" cy="8" r="7" stroke="#ef4444" strokeWidth="1.5"/>
+                <path d="M8 5v3.5" stroke="#ef4444" strokeWidth="1.5" strokeLinecap="round"/>
+                <circle cx="8" cy="11" r="0.75" fill="#ef4444"/>
+              </svg>
+              <span style={{ fontSize: '13px', color: '#b91c1c', lineHeight: '1.4' }}>
+                {paymentError}
+              </span>
+            </div>
+          )}
  
         </div>
       </div>
@@ -485,8 +497,8 @@ export default function QRScanner() {
       {/* Instructions — outside camera container, sits below the video in normal flow */}
       {!error && (
         <div
-          style={{ flexShrink: 0, background: 'white', paddingBottom: '24px', paddingTop: '16px', textAlign: 'center', width: '100%'  }}
-          className="text-center text-white"
+          style={{ flexShrink: 0, background: 'black', paddingBottom: '24px', paddingTop: '16px', textAlign: 'center', width: '100%' }}
+          className="text-white"
         >
           <Camera size={28} className="mx-auto mb-2" />
           <p className="text-sm font-medium">Position QR code within the frame</p>
@@ -501,3 +513,4 @@ export default function QRScanner() {
     </div>
   );
 }
+ 
