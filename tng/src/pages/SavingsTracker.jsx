@@ -9,7 +9,8 @@ export default function SavingsTracker() {
 
   const getSavingSuggestion = async (data) => {
     try {
-      const response = await fetch("http://127.0.0.1:8000/saving-suggestion", {
+      const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://127.0.0.1:8000";
+      const response = await fetch(`${API_BASE}/saving-suggestion`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
