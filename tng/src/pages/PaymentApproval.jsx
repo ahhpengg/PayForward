@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
   Store,
@@ -16,13 +16,35 @@ export default function PaymentApproval() {
   const [extraSaving, setExtraSaving] = useState(false);
   const [showAiAlert, setShowAiAlert] = useState(false);
 
+  const getStoredAvailableCredit = () => {
+    const storedAvailable = parseFloat(
+      sessionStorage.getItem("payforward_available_credit")
+    );
+    const storedLimit = parseFloat(
+      sessionStorage.getItem("payforward_credit_limit")
+    );
+    if (!Number.isNaN(storedAvailable)) return storedAvailable;
+    if (!Number.isNaN(storedLimit)) return storedLimit;
+    return 500;
+  };
+
   // Get scanned data from location state
   const scannedData = location.state || {};
   const merchant = scannedData.merchant || "Jaya Grocer";
   const amount = scannedData.amount || 80.0;
-  const creditLimit = scannedData.creditLimit ?? 500;
+  const creditLimit = scannedData.creditLimit ?? getStoredAvailableCredit();
   const remainingCredit = Math.max(creditLimit - amount, 0);
   const usedCredit = Math.min(amount, creditLimit);
+
+  useEffect(() => {
+    if (status === "success") {
+      sessionStorage.setItem("payforward_credit_limit", creditLimit.toString());
+      sessionStorage.setItem(
+        "payforward_available_credit",
+        remainingCredit.toString()
+      );
+    }
+  }, [status, creditLimit, remainingCredit]);
 
   const proceedWithPayment = (withExtra) => {
     setExtraSaving(withExtra);

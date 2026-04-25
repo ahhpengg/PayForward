@@ -16,6 +16,20 @@ export default function QRScanner() {
   const [merchant, setMerchant] = useState('');
   const [scannedAmount, setScannedAmount] = useState(null);
   const [error, setError] = useState(null);
+
+  const getStoredAvailableCredit = () => {
+    const storedAvailable = parseFloat(
+      sessionStorage.getItem('payforward_available_credit')
+    );
+    const storedLimit = parseFloat(
+      sessionStorage.getItem('payforward_credit_limit')
+    );
+    if (!Number.isNaN(storedAvailable)) return storedAvailable;
+    if (!Number.isNaN(storedLimit)) return storedLimit;
+    return 500;
+  };
+
+  const currentCreditLimit = getStoredAvailableCredit();
  
   const startCamera = useCallback(async () => {
     try {
@@ -76,12 +90,18 @@ export default function QRScanner() {
         stopCamera();
  
         if (parsed.amount && parsed.amount > 0) {
+          if (parsed.amount > currentCreditLimit) {
+            setError('Payment amount RM ' + parsed.amount.toFixed(2) + ' exceeds your available credit of RM ' + currentCreditLimit.toFixed(2) + '. Please scan a different QR code or enter amount manually.');
+            setIsScanning(false);
+            setHasScanned(true);
+            return;
+          }
           navigate('/pay', {
             state: {
               merchant: parsed.merchant || 'Scanned Merchant',
               amount: parsed.amount,
               qrData: code.data,
-              creditLimit: 500,
+              creditLimit: currentCreditLimit,
             },
           });
           return;
@@ -135,12 +155,16 @@ export default function QRScanner() {
       alert('Please enter a valid payment amount');
       return;
     }
+    if (amount > currentCreditLimit) {
+      alert('You do not have enough credit limit. Your current available credit is RM ' + currentCreditLimit.toFixed(2) + '. Please enter a lower amount.');
+      return;
+    }
     navigate('/pay', {
       state: {
         merchant: merchant || 'Scanned Merchant',
         amount,
         qrData,
-        creditLimit: 500,
+        creditLimit: currentCreditLimit,
       },
     });
   };

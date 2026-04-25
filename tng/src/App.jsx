@@ -87,7 +87,7 @@ function BottomNav() {
   const navItems = [
     { path: "/", icon: HomeIcon, label: "Home" },
     { path: "/savings", icon: PiggyBank, label: "Savings" },
-    { path: "/pay", icon: CreditCard, label: "Pay" },
+    { path: "/scan", icon: CreditCard, label: "Pay" },
   ];
 
   return (
@@ -108,8 +108,10 @@ function BottomNav() {
       {navItems.map((item) => {
         const Icon = item.icon;
         const isActive =
-          location.pathname === item.path ||
-          (item.path !== "/" && location.pathname.startsWith(item.path));
+          item.path === "/scan"
+            ? location.pathname === "/scan" || location.pathname === "/pay"
+            : location.pathname === item.path ||
+              (item.path !== "/" && location.pathname.startsWith(item.path));
         return (
           <button
             key={item.path}

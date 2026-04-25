@@ -15,8 +15,28 @@ export default function PayForwardHome() {
   const navigate = useNavigate();
   const [riskLevel, setRiskLevel] = useState(null);
   const [creditLimit, setCreditLimit] = useState(500);
+  const [availableCredit, setAvailableCredit] = useState(500);
   const [spendingData, setSpendingData] = useState(null);
   const [loading, setLoading] = useState(true);
+
+  const getStoredCreditState = () => {
+    const storedAvailable = parseFloat(
+      sessionStorage.getItem("payforward_available_credit")
+    );
+    const storedLimit = parseFloat(
+      sessionStorage.getItem("payforward_credit_limit")
+    );
+    if (!Number.isNaN(storedAvailable)) {
+      return {
+        creditLimit: !Number.isNaN(storedLimit) ? storedLimit : storedAvailable,
+        availableCredit: storedAvailable,
+      };
+    }
+    if (!Number.isNaN(storedLimit)) {
+      return { creditLimit: storedLimit, availableCredit: storedLimit };
+    }
+    return null;
+  };
 
   const assessRisk = async (data) => {
     try {
@@ -33,6 +53,23 @@ export default function PayForwardHome() {
         const result = await response.json();
         setRiskLevel(result.risk_level);
         setCreditLimit(result.credit_limit);
+
+        const storedAvailable = parseFloat(
+          sessionStorage.getItem("payforward_available_credit")
+        );
+        const available = !Number.isNaN(storedAvailable)
+          ? Math.min(storedAvailable, result.credit_limit)
+          : result.credit_limit;
+
+        setAvailableCredit(available);
+        sessionStorage.setItem(
+          "payforward_credit_limit",
+          result.credit_limit.toString()
+        );
+        sessionStorage.setItem(
+          "payforward_available_credit",
+          available.toString()
+        );
       } else {
         console.error("Failed to assess risk");
       }
@@ -42,11 +79,15 @@ export default function PayForwardHome() {
   };
 
   useEffect(() => {
-    // Auto-calculate metrics from past data on component mount
+    const stored = getStoredCreditState();
+    if (stored) {
+      setCreditLimit(stored.creditLimit);
+      setAvailableCredit(stored.availableCredit);
+    }
+
     const metrics = calculateMetricsFromHistory();
     setSpendingData(metrics);
-    assessRisk(metrics);
-    setLoading(false);
+    assessRisk(metrics).finally(() => setLoading(false));
   }, []);
 
   return (
@@ -66,7 +107,7 @@ export default function PayForwardHome() {
         <div
           style={{ fontSize: "36px", fontWeight: "bold", marginBottom: "16px" }}
         >
-          RM {creditLimit.toFixed(2)}
+          RM {availableCredit.toFixed(2)}
         </div>
 
         <div
