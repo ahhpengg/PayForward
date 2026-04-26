@@ -5,6 +5,8 @@
 
 🎥 [Pitch Video](https://youtu.be/Qkp0KppMr38)
 
+🌐 [Deployed Link](https://main.d2qdvsk371of4y.amplifyapp.com/)
+
 📊 [Canva Deck](https://canva.link/blevgtngpayforward26)
 
 ## 📌 Overview
