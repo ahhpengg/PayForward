@@ -1,6 +1,12 @@
 # TNG PayForward
 **Borrow for today, build for tomorrow**
 
+## 🔗 Links
+
+🎥 [Pitch Video](https://youtu.be/Qkp0KppMr38)
+
+📊 [Canva Deck](https://canva.link/blevgtngpayforward26)
+
 ## 📌 Overview
 
 TNG PayForward is a financial inclusion feature designed for integration within Touch 'n Go eWallet. It aims to empower underserved users such as low-income individuals, gig workers, and the unbanked by providing access to responsible short-term credit while encouraging savings.
