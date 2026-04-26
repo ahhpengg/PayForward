@@ -418,13 +418,30 @@ export default function QRScanner() {
   return (
     <div
       className="flex flex-col"
-      style={{ height: '100%', background: 'black', overflow: 'hidden' }}
+      style={{ height: '100%', background: '#f0f4ff', overflow: 'hidden' }}
     >
-      {/* Header */}
-      <div className="flex items-center justify-between p-4 bg-black/80 text-white" style={{ flexShrink: 0 }}>
-        <h2 className="text-lg font-semibold">Scan QR Code</h2>
-        <button onClick={() => navigate('/')} className="p-2 rounded-full hover:bg-white/20">
-          <X size={24} />
+      {/* Header — matches payment page style */}
+      <div style={{
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        padding: '16px 20px',
+        background: 'white',
+        borderBottom: '1px solid #e0e7ff',
+        boxShadow: '0 1px 4px rgba(37,99,235,0.07)',
+        flexShrink: 0,
+      }}>
+        <div>
+          <h2 style={{ fontSize: '17px', fontWeight: '700', color: '#0f172a', margin: 0 }}>Scan QR Code</h2>
+          <p style={{ fontSize: '12px', color: '#64748b', margin: 0, marginTop: '1px' }}>Point camera at a QR code to pay</p>
+        </div>
+        <button
+          onClick={() => navigate('/')}
+          style={{
+            width: '34px', height: '34px', borderRadius: '50%',
+            background: '#f1f5f9', border: 'none', cursor: 'pointer',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}
+        >
+          <X size={18} color="#475569" />
         </button>
       </div>
  
@@ -436,76 +453,113 @@ export default function QRScanner() {
           position: 'relative',
           overflow: 'hidden',
           touchAction: 'none',
-          background: 'black',
+          background: '#0f172a',
         }}
       >
         {error ? (
-          <div className="absolute inset-0 flex flex-col items-center justify-center p-6 bg-black">
-            <div className="text-center text-white">
-              <X size={48} className="mx-auto mb-4 text-red-400" />
-              <h3 className="text-lg font-semibold mb-2">Camera Error</h3>
-              <p className="text-sm mb-4">{error}</p>
-              <button onClick={startCamera} className="btn btn-primary">Try Again</button>
+          <div className="absolute inset-0 flex flex-col items-center justify-center p-6" style={{ background: '#0f172a' }}>
+            <div style={{ textAlign: 'center' }}>
+              {/* Error icon */}
+              <div style={{
+                width: '64px', height: '64px', borderRadius: '50%',
+                background: 'rgba(239,68,68,0.15)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                margin: '0 auto 16px',
+              }}>
+                <X size={32} color="#ef4444" />
+              </div>
+              <h3 style={{ color: 'white', fontSize: '16px', fontWeight: '600', marginBottom: '8px' }}>Camera Error</h3>
+              <p style={{ color: '#94a3b8', fontSize: '13px', marginBottom: '20px' }}>{error}</p>
+              <button
+                onClick={startCamera}
+                style={{
+                  padding: '10px 24px',
+                  background: 'linear-gradient(135deg, #1d4ed8, #3b82f6)',
+                  color: 'white', border: 'none', borderRadius: '10px',
+                  fontWeight: '600', fontSize: '14px', cursor: 'pointer',
+                  boxShadow: '0 4px 12px rgba(37,99,235,0.4)',
+                }}
+              >
+                Try Again
+              </button>
             </div>
           </div>
         ) : (
           <>
-            {/* Video — absolute so it doesn't affect layout size */}
             <video
               ref={videoRef}
               autoPlay
               playsInline
               muted
               style={{
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                width: '100%',
-                height: '100%',
-                objectFit: 'cover',
+                position: 'absolute', top: 0, left: 0,
+                width: '100%', height: '100%', objectFit: 'cover',
               }}
             />
- 
             <canvas ref={canvasRef} style={{ display: 'none' }} />
  
-            {/* Scanning frame overlay — centered over video */}
+            {/* Dark vignette overlay around frame */}
+            <div className="absolute inset-0 pointer-events-none" style={{
+              background: 'radial-gradient(ellipse 60% 55% at 50% 50%, transparent 48%, rgba(0,0,0,0.55) 100%)',
+            }} />
+ 
+            {/* Scanning frame — blue themed corners */}
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
               <div style={{ position: 'relative' }}>
-                <div
-                  style={{
-                    width: '280px',
-                    height: '280px',
-                    border: '2px solid white',
-                    borderRadius: '8px',
-                    background: 'rgba(0,0,0,0.2)',
-                  }}
-                />
-                <div className="absolute -top-1 -left-1 w-6 h-6 border-l-4 border-t-4 border-white rounded-tl-lg" />
-                <div className="absolute -top-1 -right-1 w-6 h-6 border-r-4 border-t-4 border-white rounded-tr-lg" />
-                <div className="absolute -bottom-1 -left-1 w-6 h-6 border-l-4 border-b-4 border-white rounded-bl-lg" />
-                <div className="absolute -bottom-1 -right-1 w-6 h-6 border-r-4 border-b-4 border-white rounded-br-lg" />
-                <div
-                  className="absolute left-2 right-2 h-0.5 bg-red-500 animate-pulse"
-                  style={{ top: '50%', transform: 'translateY(-50%)' }}
-                />
+                <div style={{
+                  width: '260px', height: '260px',
+                  border: '1.5px solid rgba(255,255,255,0.25)',
+                  borderRadius: '16px',
+                  background: 'rgba(255,255,255,0.03)',
+                }} />
+                {/* Blue corner markers */}
+                {[
+                  { top: '-2px', left: '-2px', borderTop: '3px solid #3b82f6', borderLeft: '3px solid #3b82f6', borderRadius: '4px 0 0 0' },
+                  { top: '-2px', right: '-2px', borderTop: '3px solid #3b82f6', borderRight: '3px solid #3b82f6', borderRadius: '0 4px 0 0' },
+                  { bottom: '-2px', left: '-2px', borderBottom: '3px solid #3b82f6', borderLeft: '3px solid #3b82f6', borderRadius: '0 0 0 4px' },
+                  { bottom: '-2px', right: '-2px', borderBottom: '3px solid #3b82f6', borderRight: '3px solid #3b82f6', borderRadius: '0 0 4px 0' },
+                ].map((s, i) => (
+                  <div key={i} style={{ position: 'absolute', width: '24px', height: '24px', ...s }} />
+                ))}
+                {/* Blue animated scan line */}
+                <div style={{
+                  position: 'absolute', left: '8px', right: '8px', height: '2px',
+                  background: 'linear-gradient(90deg, transparent, #3b82f6, transparent)',
+                  top: '50%', transform: 'translateY(-50%)',
+                  borderRadius: '2px',
+                  animation: 'pulse 1.5s ease-in-out infinite',
+                }} />
               </div>
             </div>
           </>
         )}
       </div>
  
-      {/* Instructions — outside camera container, sits below the video in normal flow */}
+      {/* Instructions panel — white card matching payment page */}
       {!error && (
-        <div
-          style={{ flexShrink: 0, background: 'black', paddingBottom: '24px', paddingTop: '16px', textAlign: 'center', width: '100%' }}
-          className="text-white"
-        >
-          <Camera size={28} className="mx-auto mb-2" />
-          <p className="text-sm font-medium">Position QR code within the frame</p>
+        <div style={{
+          flexShrink: 0,
+          background: 'white',
+          borderTop: '1px solid #e0e7ff',
+          padding: '16px 20px 24px',
+          textAlign: 'center',
+        }}>
+          <div style={{
+            display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+            width: '40px', height: '40px', borderRadius: '10px',
+            background: 'linear-gradient(135deg, #dbeafe, #eff6ff)',
+            border: '1px solid #bfdbfe',
+            marginBottom: '10px',
+          }}>
+            <Camera size={20} color="#2563eb" />
+          </div>
+          <p style={{ fontSize: '14px', fontWeight: '600', color: '#0f172a', margin: '0 0 4px' }}>
+            Position QR code within the frame
+          </p>
           {isScanning && (
-            <div className="flex items-center justify-center gap-2 mt-2">
-              <Loader size={14} className="animate-spin" />
-              <span className="text-xs">Scanning for QR code...</span>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', marginTop: '6px' }}>
+              <Loader size={13} color="#2563eb" style={{ animation: 'spin 1s linear infinite' }} />
+              <span style={{ fontSize: '12px', color: '#64748b' }}>Scanning for QR code...</span>
             </div>
           )}
         </div>
@@ -513,4 +567,3 @@ export default function QRScanner() {
     </div>
   );
 }
- 
